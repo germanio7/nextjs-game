@@ -23,7 +23,7 @@ export default function Home() {
       });
     });
 
-    return <Sprite image="https://pixijs.io/pixi-react/img/bunny.png" {...motion} />;
+    return <Sprite image="/bineo.png" {...motion} />;
   };
 
   return (
