@@ -3,15 +3,11 @@
 import React, { useRef, useEffect, useState } from "react";
 
 export default function Game() {
-    let canvas, ctx, ball, paddle, brickInfo, bricks, animationID;
+    let canvas, ctx, ball, player, square, rectangle, animationID;
 
     let score = 0;
 
-    const brickRowCount = 9;
-    const brickColumnCount = 5;
-
     const [gameon, setGameOn] = useState(false)
-
 
     useEffect(() => {
         canvas = document.getElementById('canvas');
@@ -20,45 +16,48 @@ export default function Game() {
         // Create ball props
         ball = {
             x: canvas.width / 2,
-            y: canvas.height / 2,
+            y: 0,
             size: 10,
             speed: 4,
             dx: 4,
-            dy: -4,
+            dy: -1,
             visible: true
         };
 
-        // Create paddle props
-        paddle = {
+        // Create player props
+        player = {
             x: canvas.width / 2 - 40,
             y: canvas.height - 20,
             w: 80,
             h: 10,
-            speed: 8,
+            speed: 4,
             dx: 0,
             visible: true
         };
 
-        // Create brick props
-        brickInfo = {
-            w: 70,
+        // Create square props
+        square = {
+            x: canvas.width / 4,
+            y: 0,
+            w: 20,
             h: 20,
-            padding: 10,
-            offsetX: 45,
-            offsetY: 60,
+            speed: 4,
+            dx: 0,
+            dy: -4,
             visible: true
         };
 
-        // Create bricks
-        bricks = [];
-        for (let i = 0; i < brickRowCount; i++) {
-            bricks[i] = [];
-            for (let j = 0; j < brickColumnCount; j++) {
-                const x = i * (brickInfo.w + brickInfo.padding) + brickInfo.offsetX;
-                const y = j * (brickInfo.h + brickInfo.padding) + brickInfo.offsetY;
-                bricks[i][j] = { x, y, ...brickInfo };
-            }
-        }
+        // Create rectangle props
+        rectangle = {
+            x: canvas.width / 10,
+            y: 0,
+            w: 40,
+            h: 20,
+            speed: 4,
+            dx: 0,
+            dy: -10,
+            visible: true
+        };
 
         // Keyboard event handlers
         document.addEventListener('keydown', keyDown);
@@ -75,26 +74,31 @@ export default function Game() {
         ctx.closePath();
     }
 
-    // Draw Paddle
-    const drawPaddle = () => {
+    // Draw player
+    const drawPlayer = () => {
         ctx.beginPath();
-        ctx.rect(paddle.x, paddle.y, paddle.w, paddle.h);
-        ctx.fillStyle = paddle.visible ? '#0095dd' : 'transparent';
+        ctx.rect(player.x, player.y, player.w, player.h);
+        ctx.fillStyle = player.visible ? '#0095dd' : 'transparent';
         ctx.fill();
         ctx.closePath();
     }
 
-    // Draw Bricks
-    const drawBricks = () => {
-        bricks.forEach(column => {
-            column.forEach(brick => {
-                ctx.beginPath();
-                ctx.rect(brick.x, brick.y, brick.w, brick.h);
-                ctx.fillStyle = brick.visible ? '#0095dd' : 'transparent';
-                ctx.fill();
-                ctx.closePath();
-            });
-        });
+    // Draw square
+    const drawSquare = () => {
+        ctx.beginPath();
+        ctx.rect(square.x, square.y, square.w, square.h);
+        ctx.fillStyle = player.visible ? '#0095dd' : 'transparent';
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    // Draw rectangle
+    const drawRectangle = () => {
+        ctx.beginPath();
+        ctx.rect(rectangle.x, rectangle.y, rectangle.w, rectangle.h);
+        ctx.fillStyle = rectangle.visible ? '#0095dd' : 'transparent';
+        ctx.fill();
+        ctx.closePath();
     }
 
     // Draw Score
@@ -103,99 +107,70 @@ export default function Game() {
         ctx.fillText(`Score: ${score}`, canvas.width - 100, 30);
     }
 
-    // Move Paddle
-    const movePaddle = () => {
+    // Move player
+    const moveplayer = () => {
 
-        paddle.x += paddle.dx;
+        player.x += player.dx;
 
         // Wall detection
-        if (paddle.x + paddle.w > canvas.width) {
-            paddle.x = canvas.width - paddle.w;
+        if (player.x + player.w > canvas.width) {
+            player.x = canvas.width - player.w;
         }
 
-        if (paddle.x < 0) {
-            paddle.x = 0;
+        if (player.x < 0) {
+            player.x = 0;
         }
     }
 
     // Move ball
     const moveBall = () => {
-        ball.x += ball.dx;
-        ball.y += ball.dy;
+        ball.y += -ball.dy;
 
-        // Wall collision (right/left)
-        if (ball.x + ball.size > canvas.width || ball.x - ball.size < 0) {
-            ball.dx *= -1; // ball.dx = ball.dx * -1
-        }
-
-        // Wall collision (top/bottom)
-        if (ball.y + ball.size > canvas.height || ball.y - ball.size < 0) {
-            ball.dy *= -1;
-        }
-
-        // console.log(ball.x, ball.y);
-
-        // Paddle collision
+        // player collision
         if (
-            ball.x - ball.size > paddle.x &&
-            ball.x + ball.size < paddle.x + paddle.w &&
-            ball.y + ball.size > paddle.y
+            ball.x - ball.size > player.x &&
+            ball.x + ball.size < player.x + player.w &&
+            ball.y + ball.size > player.y
         ) {
-            ball.dy = -ball.speed;
-        }
-
-        // Brick collision
-        bricks.forEach(column => {
-            column.forEach(brick => {
-                if (brick.visible) {
-                    if (
-                        ball.x - ball.size > brick.x && // left brick side check
-                        ball.x + ball.size < brick.x + brick.w && // right brick side check
-                        ball.y + ball.size > brick.y && // top brick side check
-                        ball.y - ball.size < brick.y + brick.h // bottom brick side check
-                    ) {
-                        ball.dy *= -1;
-                        brick.visible = false;
-
-                        increaseScore();
-                    }
-                }
-            });
-        });
-
-        // Hit bottom wall - Lose
-        if (ball.y + ball.size > canvas.height) {
-            showAllBricks();
-            score = 0;
-        }
-    }
-
-    const increaseScore = () => {
-        score++;
-
-        if (score % (brickRowCount * brickColumnCount) === 0) {
-
+            score++;
             ball.visible = false;
-            paddle.visible = false;
-
-            //After 0.5 sec restart the game
-            setTimeout(function () {
-                showAllBricks();
-                score = 0;
-                paddle.x = canvas.width / 2 - 40;
-                paddle.y = canvas.height - 20;
-                ball.x = canvas.width / 2;
-                ball.y = canvas.height / 2;
-                ball.visible = true;
-                paddle.visible = true;
-            }, 3000)
+        } else {
+            score--;
         }
     }
 
-    const showAllBricks = () => {
-        bricks.forEach(column => {
-            column.forEach(brick => (brick.visible = true));
-        });
+    // Move square
+    const moveSquare = () => {
+        square.y += -square.dy;
+
+        // player collision
+        if (
+            square.x - square.size > player.x &&
+            square.x + square.size < player.x + player.w &&
+            square.y + square.size > player.y
+        ) {
+            score++;
+            square.visible = false;
+        } else {
+            score--;
+        }
+    }
+
+    // Move rectangle
+    const moveRectangle = () => {
+        rectangle.y += -rectangle.dy;
+
+        // player collision
+        if (
+            rectangle.x - rectangle.size > player.x &&
+            rectangle.x + rectangle.size < player.x + player.w &&
+            rectangle.y + rectangle.size > player.y
+        ) {
+            score++;
+            rectangle.visible = false;
+        } else {
+            score--;
+        }
     }
 
     const draw = () => {
@@ -203,15 +178,18 @@ export default function Game() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         drawBall();
-        drawPaddle();
+        drawPlayer();
+        drawSquare();
+        drawRectangle();
         drawScore();
-        drawBricks();
     }
 
     const startGame = () => {
         setGameOn(true);
-        movePaddle();
+        moveplayer();
         moveBall();
+        moveSquare();
+        moveRectangle();
 
         // Draw everything
         draw();
@@ -221,9 +199,9 @@ export default function Game() {
 
     const keyDown = (e) => {
         if (e.key === 'Right' || e.key === 'ArrowRight') {
-            paddle.dx = paddle.speed;
+            player.dx = player.speed;
         } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-            paddle.dx = -paddle.speed;
+            player.dx = -player.speed;
         }
     }
 
@@ -234,7 +212,7 @@ export default function Game() {
             e.key === 'Left' ||
             e.key === 'ArrowLeft'
         ) {
-            paddle.dx = 0;
+            player.dx = 0;
         }
     }
 
