@@ -132,11 +132,9 @@ export default function Game() {
             ball.x + ball.size < player.x + player.w &&
             ball.y + ball.size > player.y
         ) {
-            score++;
+            score-=5;
             ball.visible = false;
-        } else {
-            score--;
-        }
+        } 
     }
 
     // Move square
@@ -145,15 +143,13 @@ export default function Game() {
 
         // player collision
         if (
-            square.x - square.size > player.x &&
-            square.x + square.size < player.x + player.w &&
-            square.y + square.size > player.y
+            square.x - square.h > player.x &&
+            square.x + square.h < player.x + player.w &&
+            square.y + square.h > player.y
         ) {
-            score++;
+            score+=15;
             square.visible = false;
-        } else {
-            score--;
-        }
+        } 
     }
 
     // Move rectangle
@@ -162,15 +158,13 @@ export default function Game() {
 
         // player collision
         if (
-            rectangle.x - rectangle.size > player.x &&
-            rectangle.x + rectangle.size < player.x + player.w &&
-            rectangle.y + rectangle.size > player.y
+            rectangle.x - rectangle.h > player.x &&
+            rectangle.x + rectangle.h < player.x + player.w &&
+            rectangle.y + rectangle.h > player.y
         ) {
-            score++;
+            score-=10;
             rectangle.visible = false;
-        } else {
-            score--;
-        }
+        } 
     }
 
     const draw = () => {
