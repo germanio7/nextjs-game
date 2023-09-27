@@ -15,13 +15,12 @@ export default function Game() {
 
         // Create ball props
         ball = {
-            x: canvas.width / 2,
+            x: Math.random() * (canvas.width - 10),
             y: 0,
             size: 10,
             speed: 4,
             dx: 4,
             dy: -1,
-            visible: true
         };
 
         // Create player props
@@ -32,31 +31,28 @@ export default function Game() {
             h: 10,
             speed: 4,
             dx: 0,
-            visible: true
         };
 
         // Create square props
         square = {
-            x: canvas.width / 4,
+            x: Math.random() * (canvas.width - 20),
             y: 0,
             w: 20,
             h: 20,
             speed: 4,
             dx: 0,
             dy: -4,
-            visible: true
         };
 
         // Create rectangle props
         rectangle = {
-            x: canvas.width / 10,
+            x: Math.random() * (canvas.width - 40),
             y: 0,
             w: 40,
             h: 20,
             speed: 4,
             dx: 0,
             dy: -10,
-            visible: true
         };
 
         // Keyboard event handlers
@@ -69,7 +65,7 @@ export default function Game() {
     const drawBall = () => {
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
-        ctx.fillStyle = ball.visible ? '#0095dd' : 'transparent';
+        ctx.fillStyle = '#0095dd';
         ctx.fill();
         ctx.closePath();
     }
@@ -78,7 +74,7 @@ export default function Game() {
     const drawPlayer = () => {
         ctx.beginPath();
         ctx.rect(player.x, player.y, player.w, player.h);
-        ctx.fillStyle = player.visible ? '#0095dd' : 'transparent';
+        ctx.fillStyle = '#22c55e';
         ctx.fill();
         ctx.closePath();
     }
@@ -87,7 +83,7 @@ export default function Game() {
     const drawSquare = () => {
         ctx.beginPath();
         ctx.rect(square.x, square.y, square.w, square.h);
-        ctx.fillStyle = player.visible ? '#0095dd' : 'transparent';
+        ctx.fillStyle = '#eab308';
         ctx.fill();
         ctx.closePath();
     }
@@ -96,7 +92,7 @@ export default function Game() {
     const drawRectangle = () => {
         ctx.beginPath();
         ctx.rect(rectangle.x, rectangle.y, rectangle.w, rectangle.h);
-        ctx.fillStyle = rectangle.visible ? '#0095dd' : 'transparent';
+        ctx.fillStyle = '#ef4444';
         ctx.fill();
         ctx.closePath();
     }
@@ -104,6 +100,7 @@ export default function Game() {
     // Draw Score
     function drawScore() {
         ctx.font = "20px Arial";
+        ctx.fillStyle = '#8b5cf6';
         ctx.fillText(`Score: ${score}`, canvas.width - 100, 30);
     }
 
@@ -126,20 +123,30 @@ export default function Game() {
     const moveBall = () => {
         ball.y += -ball.dy;
 
+        if (ball.y > player.y) {
+            ball.x = Math.random() * (canvas.width - 20);
+            ball.y = 0;
+        }
+
         // player collision
         if (
             ball.x - ball.size > player.x &&
             ball.x + ball.size < player.x + player.w &&
             ball.y + ball.size > player.y
         ) {
-            score-=5;
-            ball.visible = false;
-        } 
+            score -= 5;
+        }
+
     }
 
     // Move square
     const moveSquare = () => {
         square.y += -square.dy;
+
+        if (square.y > player.y) {
+            square.x = Math.random() * (canvas.width - 20);
+            square.y = 0;
+        }
 
         // player collision
         if (
@@ -147,14 +154,18 @@ export default function Game() {
             square.x + square.h < player.x + player.w &&
             square.y + square.h > player.y
         ) {
-            score+=15;
-            square.visible = false;
-        } 
+            score += 15;
+        }
     }
 
     // Move rectangle
     const moveRectangle = () => {
         rectangle.y += -rectangle.dy;
+
+        if (rectangle.y > player.y) {
+            rectangle.x = Math.random() * (canvas.width - 20);
+            rectangle.y = 0;
+        }
 
         // player collision
         if (
@@ -162,9 +173,9 @@ export default function Game() {
             rectangle.x + rectangle.h < player.x + player.w &&
             rectangle.y + rectangle.h > player.y
         ) {
-            score-=10;
-            rectangle.visible = false;
-        } 
+            score -= 10;
+        }
+
     }
 
     const draw = () => {
